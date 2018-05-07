@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <p>Click the button to display the time.</p>
+    <input id='yt_url' value='haha' />
+    <button onclick="download_file()">Download</button>
+
+    <p id="demo"></p>
+
+    <script>
+        function download_file() {
+            url = document.getElementById('yt_url').value;
+            console.log('url: ' + url);
+            $.ajax({
+                url: "download_file?url=" + url,
+                type: 'GET',
+                success: function (res) {
+                    var _json = JSON.parse(res)
+                    var fp = _json.fp;
+                    var title = _json.title;
+                    //console.log('received - fp:' + _json.fp + ' title: ' + _json.title);
+                    window.location.href = 'get_file?fp=' + fp + '&title=' + title;
+                }
+            });
+        }
+    </script>
+
+</body>
+
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+</html>
