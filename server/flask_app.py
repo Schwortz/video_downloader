@@ -24,7 +24,7 @@ def download_file():
     if not test_url(url):
         return 'Please Enter A Valid YouTube URL'
     print(url)
-    #title = downloader.main(url) + '.mp4'
+    title = downloader.main(url) + '.mp4'
     title = 'test_file.mp4'
     fp = 'my_file.mp4'
     _json = {
