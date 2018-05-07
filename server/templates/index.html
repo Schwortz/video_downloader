@@ -3,8 +3,8 @@
 
 <body>
 
-    <p>Click the button to display the time.</p>
-    <input id='yt_url' value='haha' />
+    <p>Enter Youtube link and click download</p>
+    <input id='yt_url' value='https://www.youtube.com/watch?v=VKgyH9k1CSM' />
     <button onclick="download_file()">Download</button>
 
     <p id="demo"></p>
@@ -20,7 +20,6 @@
                     var _json = JSON.parse(res)
                     var fp = _json.fp;
                     var title = _json.title;
-                    //console.log('received - fp:' + _json.fp + ' title: ' + _json.title);
                     window.location.href = 'get_file?fp=' + fp + '&title=' + title;
                 }
             });
