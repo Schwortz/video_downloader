@@ -1,13 +1,86 @@
 <!DOCTYPE html>
 <html>
+<style>
+    #myProgress {
+        width: 300px;
+        background-color: #ddd;
+    }
+
+    #myBar {
+        width: 0%;
+        height: 30px;
+        background-color: #4CAF50;
+    }
+    #main_div {
+        width: 50%;
+    }
+ }
+</style>
 
 <body>
 
-    <p>Enter Youtube link and click download</p>
-    <input id='yt_url' value='https://www.youtube.com/watch?v=VKgyH9k1CSM' />
-    <button onclick="download_file()">Download</button>
+    <div id="main_div">
+        <p>Enter Youtube link and click download</p>
+        <input size="40" id='yt_url' value='https://www.youtube.com/watch?v=NXlmh2IAyow' />
+        <button onclick="download_file()">Download</button>
 
-    <p id="demo"></p>
+        <div id="myProgress">
+            <div id="myBar">
+                
+            </div>
+            <span id="progress_label" style="position: absolute; text-align: center; height: 30px; width:300px;">0%</span>
+        </div>
+    </div>
+
+    <script>
+        function set_progress(percent) {
+            var elem = document.getElementById("myBar");
+            elem.style.width = percent + '%';
+            var prog_label = document.getElementById("progress_label");
+            elem.innerText = percent + '%';
+        }
+    </script>
+
+    <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function progress_loop() {
+            console.log('progress_loop')
+            $.ajax({
+                url: "check_progress",
+                type: 'GET',
+                success: function (res) {
+                    var _json = JSON.parse(res)
+                    if (_json.error)
+                        return _json.error
+
+                    var percent = _json.percent;
+                    var is_done = _json.is_done;
+                    update_progress(percent);
+
+                    if (is_done)
+                        get_file()
+                    else{
+                        var rand = Math.random()
+                        var timeout = 1000 + 500*rand;
+                        setTimeout(progress_loop, timeout);
+                    }
+
+
+                    //window.location.href = 'get_file?fp=' + fp + '&title=' + title;
+                }
+            });
+        }
+        function update_progress(progress) {
+            console.log(progress);
+            set_progress(progress);
+        }
+        function get_file() {
+            window.location.href = 'get_file';
+        }
+    </script>
 
     <script>
         function download_file() {
@@ -18,9 +91,12 @@
                 type: 'GET',
                 success: function (res) {
                     var _json = JSON.parse(res)
+                    if (_json.error)
+                        return _json.error
                     var fp = _json.fp;
                     var title = _json.title;
-                    window.location.href = 'get_file?fp=' + fp + '&title=' + title;
+                    progress_loop();
+                    //window.location.href = 'get_file?fp=' + fp + '&title=' + title;
                 }
             });
         }

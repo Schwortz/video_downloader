@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Implements a simple wrapper around urlopen."""
-from pytube.compat import urlopen
+from pytube.compat import urlopen, requests
+import threading
 
+def test():
+    return True
 
 def get(
     url=None, headers=False,
@@ -29,6 +32,46 @@ def get(
         .read()
         .decode('utf-8')
     )
+
+
+def get_parallel(url, on_progress):
+    response = urlopen(url)
+    return parallel_response(response, on_progress)
+
+
+def download(url, start_index, num_of_threads, chunk_size, total_size, on_progress, buffer, lock):
+    start_range = start_index * chunk_size
+    last_byte = total_size - 1
+    jump_size = num_of_threads * chunk_size
+    chunks = int((float(total_size) / float(chunk_size)+1))
+    while start_range < total_size:
+        headers = {
+            'range': 'bytes=%s-%s' % (start_range, min(start_range+chunk_size, last_byte))
+        }
+        response = requests.get(url, headers=headers)
+        data = response.content
+        lock.acquire()
+        buffer[start_range] = data
+        on_progress(data, buffer, chunks)
+        lock.release()
+        start_range += jump_size
+
+
+def parallel_response(response, on_progress, chunk_size=8 * 1024):
+    size = response.length
+    num_of_threads = 10
+    url = response.geturl()
+    threads = [None] * num_of_threads
+    buffer_dict = {}
+    lock = threading.Lock()
+    for i in range(0, num_of_threads):
+        args = (url, i, num_of_threads, chunk_size,
+                size, on_progress, buffer_dict, lock)
+        threads[i] = threading.Thread(target=download, args=args)
+        threads[i].start()
+    for i in range(0, num_of_threads):
+        threads[i].join()
+    return buffer_dict
 
 
 def stream_response(response, chunk_size=8 * 1024):

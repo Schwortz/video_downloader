@@ -47,6 +47,7 @@ elif PY3:
     from urllib.parse import urlencode
     from urllib.request import urlopen
     from urllib import request
+    import requests
 
     def install_proxy(proxy_handler):
         proxy_support = request.ProxyHandler(proxy_handler)

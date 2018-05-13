@@ -223,7 +223,6 @@ class Stream(object):
             'downloading (%s total bytes) file to BytesIO buffer',
             self.filesize,
         )
-
         for chunk in request.get(self.url, streaming=True):
             # reduce the (bytes) remainder by the length of the chunk.
             bytes_remaining -= len(chunk)
@@ -231,6 +230,38 @@ class Stream(object):
             self.on_progress(chunk, buffer, bytes_remaining)
         self.on_complete(buffer)
         return buffer
+    
+    def parallel_streaming(self, output_path=None, filename=None):
+        """Write the media stream to buffer
+
+        :rtype: io.BytesIO buffer
+        """
+        buffer = io.BytesIO()
+        logger.debug(
+            'downloading (%s total bytes) file to BytesIO buffer',
+            self.filesize,
+        )
+        chunks = request.get_parallel(self.url, self.on_progress_parallel)
+
+        output_path = output_path or os.getcwd()
+        if filename:
+            safe = safe_filename(filename)
+            filename = '{filename}.{s.subtype}'.format(filename=safe, s=self)
+        filename = filename or self.default_filename
+
+        # file path
+        fp = os.path.join(output_path, filename)
+        with open(fp, 'wb') as fh:
+            for chunk in sorted(chunks.values()):
+                fh.write(chunk)
+            self.on_complete(fh)
+        return fp
+
+    def on_progress_parallel(self, chunk, buffer_dict, bytes_remaining):
+        on_progress = self._monostate['on_progress']
+        if on_progress:
+            logger.debug('calling on_progress callback %s', on_progress)
+            on_progress(self, chunk, buffer_dict, bytes_remaining)
 
     def on_progress(self, chunk, file_handler, bytes_remaining):
         """On progress callback function.
