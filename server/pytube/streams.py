@@ -252,8 +252,8 @@ class Stream(object):
         # file path
         fp = os.path.join(output_path, filename)
         with open(fp, 'wb') as fh:
-            for chunk in sorted(chunks.values()):
-                fh.write(chunk)
+            for k in sorted(chunks.keys()):
+                fh.write(chunks[k])
             self.on_complete(fh)
         return fp
 

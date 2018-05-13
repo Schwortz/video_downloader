@@ -5,6 +5,7 @@ import time
 class Downloader():
     def __init__(self, url, filename):
         self._yt = YouTube(url)
+        #self._yt.register_on_progress_callback(self.show_progress_bar)
         self._yt.register_on_progress_callback(self.on_progress_parallel)
         self._yt.register_on_complete_callback(self.on_done)
         self.title = self._yt.title
@@ -51,7 +52,8 @@ class Downloader():
         stream = yt.streams.filter(mime_type='audio/mp4').first()
         self._total_bytes = stream.filesize
         t = time.time()
-        buf = stream.parallel_streaming(filename=self._filename)
+        #stream.download(filename=self._filename)        
+        stream.parallel_streaming(filename=self._filename)
         print('buffer took %d' % (time.time() -t))
         # t = time.time()
         # stream.download(filename=self._filename)

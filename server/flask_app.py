@@ -29,27 +29,23 @@ def get_file():
         return 'File Not Found'
     yt = DOWNLOADS[user_id]
     fp = yt._filename + '.mp4'
-    title = yt.title
+    title = yt.title + '.mp4'
     fp = os.path.join(os.getcwd(), fp)
     del DOWNLOADS[user_id]
-    return 'get_file'
     return send_file(filename_or_fp=fp, attachment_filename=title, as_attachment=True)
 
 @app.route("/check_progress")
 def check_progress():
-    print('check_progress')
     user_id = get_user_id(request.remote_addr)
     yt = DOWNLOADS.get(user_id, None)
     if not yt:
         return error_json('No download in progress')
     percent = yt.get_completed_percent()
     is_done = 1 if yt.is_done() else 0
-    print('title: %s - progress %d done: %d total bytes: %d' % (yt.title, percent, is_done, yt._total_bytes))
     _json = {
         "percent" : percent,
         "is_done" : is_done
     }
-    print(_json)
     return json.dumps(_json)
 
 DOWNLOADS = {}

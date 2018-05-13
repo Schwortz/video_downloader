@@ -44,17 +44,25 @@ def download(url, start_index, num_of_threads, chunk_size, total_size, on_progre
     last_byte = total_size - 1
     jump_size = num_of_threads * chunk_size
     chunks = int((float(total_size) / float(chunk_size)+1))
+    curr_index = start_index
+    all_data_len = 0
+    # print(url)
     while start_range < total_size:
+        end_range = min(start_range+chunk_size-1, last_byte)
         headers = {
-            'range': 'bytes=%s-%s' % (start_range, min(start_range+chunk_size, last_byte))
+            'range': 'bytes=%s-%s' % (start_range, end_range)
         }
         response = requests.get(url, headers=headers)
         data = response.content
         lock.acquire()
-        buffer[start_range] = data
+        # print('start %s - end %s' % (start_range, end_range))
+        buffer[curr_index] = data
+        all_data_len += len(data)
         on_progress(data, buffer, chunks)
         lock.release()
         start_range += jump_size
+        curr_index += num_of_threads
+    # print('all data len %s' % (all_data_len))
 
 
 def parallel_response(response, on_progress, chunk_size=8 * 1024):
