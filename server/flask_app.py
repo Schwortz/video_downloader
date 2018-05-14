@@ -71,6 +71,10 @@ def download_file():
     }
 
     return json.dumps(_json)
+
+@app.route('/cwd')
+def get_cwd():
+    return os.getcwd()
     
 
 if __name__ == '__main__':
