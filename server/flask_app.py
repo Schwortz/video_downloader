@@ -1,11 +1,40 @@
 import downloader
-from flask import Flask, request, render_template, send_file, json
+from flask import Flask, request, render_template, send_file, json, session, redirect
 import os
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+USERS = {
+    'Moshiko' : 'Admin',
+    'zivlet' : 'zivlet',
+}
 
 @app.route("/")
 def main():
     return render_template('index.html')
+
+@app.before_request
+def before_request():
+    print(request.endpoint)
+    if 'user' not in session and request.endpoint not in ('main', 'login'):
+        return redirect('')
+
+@app.route("/index")
+def index():
+    return render_template('home.html')
+    
+
+@app.route("/login", methods= ['POST'])
+def login():
+    user = request.form['user']
+    password = request.form['pass']
+    user_pass = USERS.get(user, None)
+    print('loggin with %s:%s' % (user, password))
+    print('pasword is %s' % (user_pass))
+    if user_pass is not None and password == user_pass:
+        session['user'] = user
+        return redirect('/index')
+    return redirect('')
 
 def test_url(url):
     if not url:
@@ -78,4 +107,4 @@ def get_cwd():
     
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=80, debug=True)
