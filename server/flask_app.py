@@ -24,17 +24,17 @@ def index():
     return render_template('home.html')
     
 
-@app.route("/login", methods= ['POST'])
+@app.route("/login", methods= ['GET'])
 def login():
-    user = request.form['user']
-    password = request.form['pass']
+    user = request.args.get('user')
+    password = request.args.get('pass')
     user_pass = USERS.get(user, None)
     print('loggin with %s:%s' % (user, password))
     print('pasword is %s' % (user_pass))
     if user_pass is not None and password == user_pass:
         session['user'] = user
-        return redirect('/index')
-    return redirect('')
+        return 'success'
+    return 'failure'
 
 def test_url(url):
     if not url:
