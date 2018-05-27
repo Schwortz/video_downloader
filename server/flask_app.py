@@ -24,10 +24,14 @@ def index():
     return render_template('home.html')
     
 
-@app.route("/login", methods= ['GET'])
+@app.route("/login", methods= ['GET','POST'])
 def login():
-    user = request.args.get('user')
-    password = request.args.get('pass')
+    if request.method == 'GET':
+        user = request.args.get('user')
+        password = request.args.get('pass')
+    else:
+        user = request.form['user']
+        password = request.form['pass']
     user_pass = USERS.get(user, None)
     print('loggin with %s:%s' % (user, password))
     print('pasword is %s' % (user_pass))
@@ -107,4 +111,4 @@ def get_cwd():
     
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=80, debug=False)
+    app.run(host="0.0.0.0", port=80, debug=True)
